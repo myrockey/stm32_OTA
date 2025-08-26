@@ -1,4 +1,5 @@
 #include "stm32f10x.h"                  // Device header
+#include "globals.h"
 #include "OTA.h"
 #include "system_stm32f10x.h"
 #include "ESP8266.h"
@@ -42,7 +43,9 @@ bootloader在启动的时候，如果FLAG区域的升级标志位没有置位，
 // 应用程序实现
 int main(void) {
     SystemInit();
-    Debug_Serial_Init();
+#if LOG_ENABLE
+  Debug_Serial_Init();
+#endif
     WIFI_Init();
     OLED_Init();
     LED_Init();

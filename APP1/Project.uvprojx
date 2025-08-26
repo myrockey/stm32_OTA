@@ -780,6 +780,16 @@
               <FileType>5</FileType>
               <FilePath>.\Hardware\Timer.h</FilePath>
             </File>
+            <File>
+              <FileName>globals.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\globals.c</FilePath>
+            </File>
+            <File>
+              <FileName>globals.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\globals.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -2,6 +2,7 @@
 #include "stdio.h"
 #include <string.h>
 #include "RingBuff.h"
+#include "globals.h"
 
 RingBuff_t encoeanBuff;
 
@@ -53,7 +54,7 @@ uint8_t Write_RingBuff(RingBuff_t *ringBuff , uint8_t data)
 		//如果buffer爆掉了，清空buffer，进行重新初始化   不初始化，会复位死机
 		// memset(ringBuff, 0, BUFFER_SIZE);
 		// RingBuff_Init(&ringBuff);
-		printf("缓冲区已满\r\n");
+		LOG_INFO("缓冲区已满\r\n");
 		ringBuff->Length = BUFFER_SIZE;
 		ringBuff->Head = ( ringBuff->Tail + 1 ) % BUFFER_SIZE;
 		//return 1;

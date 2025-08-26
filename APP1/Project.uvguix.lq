@@ -1824,9 +1824,9 @@
       </Doc>
       <Doc>
         <Name>.\Hardware\ESP8266.c</Name>
-        <ColumnNumber>21</ColumnNumber>
+        <ColumnNumber>0</ColumnNumber>
         <TopLine>315</TopLine>
-        <CurrentLine>336</CurrentLine>
+        <CurrentLine>347</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>
@@ -1842,9 +1842,9 @@
       </Doc>
       <Doc>
         <Name>.\Hardware\Serial.c</Name>
-        <ColumnNumber>13</ColumnNumber>
-        <TopLine>1</TopLine>
-        <CurrentLine>24</CurrentLine>
+        <ColumnNumber>1</ColumnNumber>
+        <TopLine>4</TopLine>
+        <CurrentLine>34</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>

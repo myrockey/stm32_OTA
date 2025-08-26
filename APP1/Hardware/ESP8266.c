@@ -4,6 +4,7 @@
 #include "RingBuff.h"
 #include "Delay.h"
 #include "Serial.h"
+#include "globals.h"
 
 volatile char WIFI_CONNECT = 0;//服务器连接模式，1-表示已连接，0表示未连接
 volatile char PING_MODE = 0;//ping心跳包发送模式，1表示开启30s发送模式，0表示未开启发送或开启2s快速发送模式。
@@ -113,7 +114,7 @@ char ESP8266_WiFi_Reset(int timeout)
 		{
 			return 0;		         				   	//反之，表示正确，说明收到ready，通过break主动跳出while
 		}
-		printf("reset timeout:%d", timeout);                     //串口输出现在的超时时间
+		LOG_INFO("reset timeout:%d", timeout);                     //串口输出现在的超时时间
 	}
 	return 1;                      //如果timeout<=0，说明超时时间到了，也没能收到ready，返回1
 }
@@ -147,45 +148,45 @@ char ESP8266_WiFi_JoinAP(int timeout)
 		{
 			return 0;		
 		}
-		printf("joinAp timeout:%d \r\n", timeout);                            //串口输出现在的超时时间
+		LOG_INFO("joinAp timeout:%d \r\n", timeout);                            //串口输出现在的超时时间
 	}
 	return 1;                              //如果timeout<=0，说明超时时间到了，也没能收到WIFI GOT IP，返回1                                              //正确，返回0
 }
 
 //连接到OTA服务器
 char ESP8266_WIFI_Connect(void) {	
-	printf("准备设置STA模式\r\n");                
+	LOG_INFO("准备设置STA模式\r\n");                
 	if(ESP8266_SendCommand("AT+CWMODE=1\r\n","OK",50))			  //设置STA模式，100ms超时单位，总计5s超时时间
 	{             
-		printf("设置STA模式失败，准备重启\r\n");  //返回非0值，进入if
+		LOG_INFO("设置STA模式失败，准备重启\r\n");  //返回非0值，进入if
 		return 1;                                 //返回2
 	}
-	printf("设置STA模式成功\r\n");     
+	LOG_INFO("设置STA模式成功\r\n");     
 
-	printf("准备复位模块\r\n");//设置模式后，需重启才能生效                   
+	LOG_INFO("准备复位模块\r\n");//设置模式后，需重启才能生效                   
 	if(ESP8266_WiFi_Reset(50))							  //复位，100ms超时单位，总计5s超时时间
 	//if(ESP8266_SendCommand("AT+RST\r\n","OK",100))							  //复位，100ms超时单位，总计5s超时时间
 	{                             
-		printf("复位失败，准备重启\r\n");	      //返回非0值，进入if
+		LOG_INFO("复位失败，准备重启\r\n");	      //返回非0值，进入if
 		return 2;                                 //返回1
 	} 
-	printf("复位成功\r\n"); 
+	LOG_INFO("复位成功\r\n"); 
 	
-	printf("准备取消自动连接\r\n");            	  
+	LOG_INFO("准备取消自动连接\r\n");            	  
 	if(ESP8266_SendCommand("AT+CWAUTOCONN=0\r\n","OK",50))		  //取消自动连接，100ms超时单位，总计5s超时时间
 	{       
-		printf("取消自动连接失败，准备重启\r\n"); //返回非0值，进入if
+		LOG_INFO("取消自动连接失败，准备重启\r\n"); //返回非0值，进入if
 		return 3;                                 //返回3
 	}
-	printf("取消自动连接成功\r\n");         
+	LOG_INFO("取消自动连接成功\r\n");         
 			
-	printf("准备连接路由器\r\n");                 	
+	LOG_INFO("准备连接路由器\r\n");                 	
 	if(ESP8266_WiFi_JoinAP(30))							  //连接路由器,1s超时单位，总计30s超时时间
 	{                          
-		printf("连接路由器失败，准备重启\r\n");   //返回非0值，进入if
+		LOG_INFO("连接路由器失败，准备重启\r\n");   //返回非0值，进入if
 		return 4;                                 //返回4	
 	}
-	printf("连接路由器成功\r\n");   
+	LOG_INFO("连接路由器成功\r\n");   
 
 	return 0;
  }
@@ -248,7 +249,7 @@ void WIFI_TIM_IRQHandler(void)
 {
 	if(TIM_GetITStatus(WIFI_TIM, TIM_IT_Update) != RESET)//如果TIM_IT_Update置位，表示TIM3溢出中断，进入if	
 	{  
-		printf("pingFlag=%d\r\n",pingFlag);
+		LOG_INFO("pingFlag=%d\r\n",pingFlag);
 		switch(pingFlag) 					//判断pingFlag的状态
 		{                               
 			case 0:							//如果pingFlag等于0，表示正常状态，发送Ping报文  
@@ -301,7 +302,7 @@ uint8_t ESP8266_HTTP_GET_SYNC(const char *url, uint8_t *response, uint32_t respo
     // 发送连接命令
     sprintf(cmd, "AT+CIPSTART=\"TCP\",\"%s\",80", host);
     if (ESP8266_SendCommand(cmd, "OK", 30) != 0) {
-        printf("Failed to start connection\n");
+        LOG_INFO("Failed to start connection\n");
         return 1; // 连接失败
     }
 
@@ -316,7 +317,7 @@ uint8_t ESP8266_HTTP_GET_SYNC(const char *url, uint8_t *response, uint32_t respo
     uint32_t request_length = strlen(http_request);
     sprintf(cmd, "AT+CIPSEND=%d", request_length);
     if (ESP8266_SendCommand(cmd, ">", 30) != 0) {
-        printf("Failed to send data: %s\n", http_request);
+        LOG_INFO("Failed to send data: %s\n", http_request);
         ESP8266_Disconnect();
         return 2; // 发送失败
     }
@@ -337,7 +338,7 @@ uint8_t ESP8266_HTTP_GET_SYNC(const char *url, uint8_t *response, uint32_t respo
         }
 		if(len > response_size)
 		{
-			printf("transfer limit %d",response_size);
+			LOG_INFO("transfer limit %d",response_size);
 		}
 
 		RingBuff_ReadNByte(&encoeanBuff, response, response_size);
@@ -364,7 +365,7 @@ void WIFI_Receive_Task(void)
 	WIFI_Check_Flag = 0;
 
 	int len;
-	//printf("KEY_Task Running\r\n");
+	//LOG_INFO("KEY_Task Running\r\n");
 	len = RingBuff_GetLen(&encoeanBuff);
 	if (len) 
 	{
@@ -372,13 +373,13 @@ void WIFI_Receive_Task(void)
 		RingBuff_ReadNByte(&encoeanBuff,received_str,len);
 		received_str[len] = '\0';
 		// 输出接收到的字符串
-		printf("Received: %s\n", received_str);
+		LOG_INFO("Received: %s\n", received_str);
 
 		// ping状态，wifi连接成功
 		//+CWJAP 且 OK
 		if (strstr((const char*)received_str, "+CWJAP") != NULL && strstr((const char*)received_str, "OK") != NULL) 
 		{
-			printf("PING success\r\n");                       
+			LOG_INFO("PING success\r\n");                       
 			if(pingFlag == 1)
 			{                   						     //如果pingFlag=1，表示第一次发送
 				pingFlag = 0;    				       		 //要清除pingFlag标志
@@ -400,14 +401,14 @@ uint8_t WIFI_Task(void)
 	if(WIFI_CONNECT != 1)
 	{
         uint8_t wifiState;
-		printf("wifi connecting...\r\n");                 
+		LOG_INFO("wifi connecting...\r\n");                 
 		TIM_Cmd(WIFI_TIM, DISABLE);                       //关闭TIM3
 		PING_MODE = 0;//关闭发送PING包的定时器3，清除事件标志位
 		ESP8266_Buf_Clear();//清空接收缓存区
 		wifiState = ESP8266_WIFI_Connect();
 		if(wifiState == 0)			  //如果WiFi连接云服务器函数返回0，表示正确，进入if
 		{   			     
-			printf("wifi connect success\r\n"); 
+			LOG_INFO("wifi connect success\r\n"); 
 			ESP8266_Buf_Clear();//清空接收缓存区
 
 			WIFI_CONNECT = 1;  //服务器已连接，抛出事件标志 
@@ -424,7 +425,7 @@ uint8_t WIFI_Task(void)
 	//服务器连接以及ping心跳包30S发送模式事件发生时执行此任务，否则挂起任务
 	if(PING_MODE == 0)
 	{
-		printf("WIFI connect error\r\n");
+		LOG_INFO("WIFI connect error\r\n");
 		return 1;
 	}
 
