@@ -1,0 +1,5 @@
+### stm32 OTA wifi连接情况下自动升级
+
+# PA2 PA3 ESP8266 (USART2)
+# PA4 PA5 LED
+# PB8 PB9 OLED

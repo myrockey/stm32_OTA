@@ -2,6 +2,37 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+// //配置调试
+void Debug_Serial_Init(void) {
+  GPIO_InitTypeDef GPIO_InitStructure;
+  USART_InitTypeDef USART_InitStructure;
+
+  // 使能GPIOA和USART1时钟
+  DEBUG_GPIO_APBX(DEBUG_GPIO_CLK, ENABLE);
+  DEBUG_APBX(DEBUG_CLK, ENABLE);
+
+  // 配置USART2的TX和RX引脚
+  GPIO_InitStructure.GPIO_Pin = DEBUG_TX_GPIO_PIN;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_Init(DEBUG_GPIO_PORT, &GPIO_InitStructure);
+
+  GPIO_InitStructure.GPIO_Pin = DEBUG_RX_GPIO_PIN;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+  GPIO_Init(DEBUG_GPIO_PORT, &GPIO_InitStructure);
+
+  // 配置USART2
+  USART_InitStructure.USART_BaudRate = DEBUG_USART_BAUDRATE;
+  USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+  USART_InitStructure.USART_StopBits = USART_StopBits_1;
+  USART_InitStructure.USART_Parity = USART_Parity_No;
+  USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+  USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+  USART_Init(DEBUG_USARTX, &USART_InitStructure);
+
+  USART_Cmd(DEBUG_USARTX, ENABLE);
+}
+
 
 // DMA配置函数
 void DMA_Init_ESP8266(uint8_t * rxBuffer)
@@ -194,7 +225,7 @@ void Serial_SendNumber(USART_TypeDef * pUSARTx, uint32_t Number, uint8_t Length)
   */
 int fputc(int ch, FILE *f)
 {
-	Serial_SendByte(USE_USARTX, ch);			//将printf的底层重定向到自己的发送字节函数
+	Serial_SendByte(DEBUG_USARTX, ch);			//将printf的底层重定向到自己的发送字节函数
 	return ch;
 }
 
@@ -202,8 +233,8 @@ int fputc(int ch, FILE *f)
 int fgetc(FILE *f)
 {
     /* 等待串口输入数据 */
-    while(USART_GetFlagStatus(USE_USARTX,USART_FLAG_TXE)==RESET);
-    return (int)USART_ReceiveData(USE_USARTX);
+    while(USART_GetFlagStatus(DEBUG_USARTX,USART_FLAG_TXE)==RESET);
+    return (int)USART_ReceiveData(DEBUG_USARTX);
 }
 
 /**

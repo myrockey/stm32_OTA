@@ -42,6 +42,7 @@ bootloader在启动的时候，如果FLAG区域的升级标志位没有置位，
 // 应用程序实现
 int main(void) {
     SystemInit();
+    Debug_Serial_Init();
     WIFI_Init();
     OLED_Init();
     LED_Init();
